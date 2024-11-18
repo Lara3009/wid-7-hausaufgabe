@@ -77,16 +77,24 @@ function Map() {
   }
 
   useEffect(() => {
-    const url = `${BASE_URL}/${minMag}_${timespan}.geojson`;
-    fetchQuakeData(url);
-  }, []);
+    let magParam = minMag;
+    if (timespan === "month" && (minMag === "all" || minMag === "1.0")) {
+      magParam = "2.5";
+    }
 
-  // console.log(quakesJson);
+    const url = `${BASE_URL}${magParam}_${timespan}.geojson`;
+    fetchQuakeData(url);
+  }, [minMag, timespan]);
 
   return (
     <>
       <CssBaseline />
-      <Header />
+      <Header
+        timespan={timespan}
+        setTimespan={setTimespan}
+        minMag={minMag}
+        setMinMag={setMinMag}
+      />
       <MapContainer
         style={{ height: "100vh" }}
         center={[0, 0]}
@@ -96,17 +104,20 @@ function Map() {
         maxBoundsViscosity={1}
       >
         <LayersControl position="topright">
-          {BASE_LAYERS.map(baseLayer => (
+          {BASE_LAYERS.map((baseLayer) => (
             <LayersControl.BaseLayer
               key={baseLayer.url}
               checked={baseLayer.checked}
               name={baseLayer.name}
             >
-              <TileLayer attribution={baseLayer.attribution} url={baseLayer.url} />
+              <TileLayer
+                attribution={baseLayer.attribution}
+                url={baseLayer.url}
+              />
             </LayersControl.BaseLayer>
           ))}
 
-          <LayersControl.Overlay checked name="USGQ Earthquakes">
+          <LayersControl.Overlay checked name="USGS Earthquakes">
             <GeoJSON
               data={quakesJson}
               pointToLayer={pointToLayer}
